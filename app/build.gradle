@@ -1,0 +1,25 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 17
+    buildToolsVersion "24.0.1"
+
+    defaultConfig {
+        applicationId "com.github.fpi"
+        minSdkVersion 17
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+}
+
+dependencies {
+    provided 'de.robv.android.xposed:api:82'
+    compile 'com.google.android.gms:play-services:7.0.0'
+}
