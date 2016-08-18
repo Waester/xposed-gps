@@ -2,14 +2,12 @@ package com.github.fpi;
 
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.telephony.CellInfo;
 import android.telephony.CellLocation;
 import android.telephony.NeighboringCellInfo;
 import android.util.Log;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -25,61 +23,15 @@ public class ServiceActivity implements IXposedHookLoadPackage {
 
     private String TAG = "FPI";
     private Settings settings = new Settings();
-    private double newLat;
-    private double newLng;
-    //private float newAcc;
-    private long lastUpdate = 0;
-
-    private void updateLocation() {
-        if (SystemClock.elapsedRealtime() - lastUpdate >= 1000) {
-            lastUpdate = SystemClock.elapsedRealtime();
-            //Random rand = new Random();
-
-            // http://stackoverflow.com/questions/2839533/adding-distance-to-a-gps-coordinate
-            // http://stackoverflow.com/questions/15055624/generating-random-doubles-in-java
-            //double earth = 6378137;
-            //double min = 5 / earth * -1;
-            //double max = 5 / earth * 2;
-            //double dLat = min + rand.nextDouble() * max;
-            //double dLng = min + rand.nextDouble() * max;
-            newLat = settings.getLat();// + Math.toDegrees(dLng);
-            newLng = settings.getLng();// + Math.toDegrees(dLat / Math.cos(Math.toRadians(settings.getLat())));
-            // ----
-
-            //newAcc = (float) (rand.nextInt(20) + 25);
-        }
-    }
 
     private Bundle modifyBundle(Bundle bundle) {
         if (bundle != null) {
             if (bundle.containsKey("wifiScan")) {
                 bundle.remove("wifiScan");
             }
-            /*
-            for (String key : bundle.keySet()) {
-                if (bundle.get(key) instanceof Location) {
-                    Location location = (Location) bundle.get(key);
-                    bundle.putParcelable(key, spoofLocation(location));
-                }
-            }
-            */
         }
         return bundle;
     }
-
-    /*
-    private Location spoofLocation(Location location) {
-        if (location != null) {
-            location.setLatitude(newLat);
-            location.setLongitude(newLng);
-            //location.setAccuracy(newAcc);
-
-            Bundle bundle = location.getExtras();
-            location.setExtras(modifyBundle(bundle));
-        }
-        return location;
-    }
-    */
 
     @Override
     public void handleLoadPackage(LoadPackageParam loadPackageParam) throws Throwable {
@@ -89,22 +41,13 @@ public class ServiceActivity implements IXposedHookLoadPackage {
         if (appsToHook.contains(loadPackageParam.packageName)) {
             HashSet<String> Classes = new HashSet<String>();
             Classes.add("android.location.Location");
-            //Classes.add("android.location.LocationManager");
             Classes.add("android.net.wifi.WifiManager");
             Classes.add("android.telephony.TelephonyManager");
 
             HashSet<String> methodsToHook = new HashSet<String>();
-            methodsToHook.add("getLatitude");
-            methodsToHook.add("getLongitude");
-            //methodsToHook.add("getAccuracy");
-            methodsToHook.add("getExtras");
-            //methodsToHook.add("getLastKnownLocation");
-            //methodsToHook.add("getLastLocation");
-            //methodsToHook.add("getExtraLocation");
-            methodsToHook.add("getScanResults");
-            methodsToHook.add("getAllCellInfo");
-            methodsToHook.add("getCellLocation");
-            methodsToHook.add("getNeighboringCellInfo");
+            for (Methods method : Methods.values()) {
+                methodsToHook.add(method.toString());
+            }
 
             //Log.d(TAG, "Trying to hook " + loadPackageParam.packageName);
 
@@ -114,8 +57,7 @@ public class ServiceActivity implements IXposedHookLoadPackage {
                 try {
                     Class<?> hookClass = findClass(clazz, loadPackageParam.classLoader);
                     for (Method method : hookClass.getDeclaredMethods()) {
-                        int m = method.getModifiers();
-                        if (Modifier.isPublic(m) && !Modifier.isStatic(m) && methodsToHook.contains(method.getName())) {
+                        if (methodsToHook.contains(method.getName())) {
                             XposedBridge.hookMethod(method, methodHook);
                             //Log.v(TAG, "Hooking method " + method.getName());
                         }
@@ -128,14 +70,10 @@ public class ServiceActivity implements IXposedHookLoadPackage {
         }
     }
 
-    private enum methods {
+    private enum Methods {
         getLatitude,
         getLongitude,
-        //getAccuracy,
         getExtras,
-        //getLastKnownLocation,
-        //getLastLocation,
-        //getExtraLocation,
         getScanResults,
         getAllCellInfo,
         getCellLocation,
@@ -150,58 +88,23 @@ public class ServiceActivity implements IXposedHookLoadPackage {
 
             /* Injection of the faked gps data */
             if (settings.isStarted()) {
-                updateLocation();
-
-                switch (methods.valueOf(param.method.getName())) {
+                switch (Methods.valueOf(param.method.getName())) {
 
                     case getLatitude:
-                        param.setResult(newLat);
+                        param.setResult(settings.getLat());
                         //Log.v(TAG, "getLatitude " + param.getResult());
                         break;
 
                     case getLongitude:
-                        param.setResult(newLng);
+                        param.setResult(settings.getLng());
                         //Log.v(TAG, "getLongitude " + param.getResult());
                         break;
-
-                    /*
-                    case getAccuracy:
-                        param.setResult(newAcc);
-                        //Log.v(TAG, "getAccuracy " + param.getResult());
-                        break;
-                    */
 
                     case getExtras:
                         Bundle bundle = (Bundle) param.getResult();
                         param.setResult(modifyBundle(bundle));
                         //Log.v(TAG, "getExtras " + param.getResult());
                         break;
-
-                    /*
-                    case getLastKnownLocation:
-                        if (param.getResult() instanceof Location) {
-                            Location location = (Location) param.getResult();
-                            param.setResult(spoofLocation(location));
-                            //Log.v(TAG, "getLastKnownLocation " + param.getResult());
-                        }
-                        break;
-
-                    case getLastLocation:
-                        if (param.getResult() instanceof Location) {
-                            Location location = (Location) param.getResult();
-                            param.setResult(spoofLocation(location));
-                            //Log.v(TAG, "getLastLocation " + param.getResult());
-                        }
-                        break;
-
-                    case getExtraLocation:
-                        if (param.getResult() instanceof Location) {
-                            Location location = (Location) param.getResult();
-                            param.setResult(spoofLocation(location));
-                            //Log.v(TAG, "getExtraLocation " + param.getResult());
-                        }
-                        break;
-                    */
 
                     case getScanResults:
                         if (param.getResult() != null) {
