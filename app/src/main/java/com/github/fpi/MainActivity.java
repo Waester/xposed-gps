@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -14,11 +15,18 @@ import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
+import com.google.android.gms.maps.LocationSource;
+import com.google.android.gms.maps.LocationSource.OnLocationChangedListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -27,7 +35,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends Activity implements OnMapClickListener {
+public class MainActivity extends Activity {
 
     private MarkerOptions mMarker = null;
     private GoogleMap mMap = null;
@@ -35,6 +43,10 @@ public class MainActivity extends Activity implements OnMapClickListener {
     private Settings settings = null;
     private CameraUpdate cam = null;
     private ToggleButton tb = null;
+    private GoogleApiClient mGoogleApiClient = null;
+    private OnLocationChangedListener mMapLocationListener = null;
+    private LocationRequest locationRequest = LocationRequest.create()
+            .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,8 +64,8 @@ public class MainActivity extends Activity implements OnMapClickListener {
             MapFragment m = (MapFragment) f;
             mMap = m.getMap();
             mMap.setMyLocationEnabled(true);
+            mMap.setLocationSource(new locationSource());
             mMap.getUiSettings().setZoomControlsEnabled(true);
-            mMap.setOnMapClickListener(this);
             mMarker = new MarkerOptions();
             mInit = new LatLng(settings.getLat(), settings.getLng());
             mMarker.position(mInit);
@@ -63,11 +75,38 @@ public class MainActivity extends Activity implements OnMapClickListener {
             mMap.addMarker(mMarker);
 
             mMap.setOnMarkerClickListener(new OnMarkerClickListener() {
-                public boolean onMarkerClick(Marker m) {
+                @Override
+                public boolean onMarkerClick(Marker marker) {
                     return true;
                 }
             });
+
+            mMap.setOnMapClickListener(new OnMapClickListener() {
+                @Override
+                public void onMapClick(LatLng latLng) {
+                    mMarker.position(latLng);
+                    mMap.clear();
+                    mMap.addMarker(mMarker);
+                }
+            });
         }
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(new connectionCallbacks())
+                .build();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mGoogleApiClient.disconnect();
     }
 
     public void setLocation(View v) {
@@ -118,15 +157,44 @@ public class MainActivity extends Activity implements OnMapClickListener {
                     mMap.moveCamera(cam);
                 }
             } catch (Exception ex) {
-
+                // Do nothing
             }
         }
     }
 
-    @Override
-    public void onMapClick(LatLng point) {
-        mMarker.position(point);
-        mMap.clear();
-        mMap.addMarker(mMarker);
+    private class connectionCallbacks implements ConnectionCallbacks {
+        @Override
+        public void onConnected(Bundle bundle) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(
+                    mGoogleApiClient,
+                    locationRequest,
+                    new locationListener());
+        }
+
+        @Override
+        public void onConnectionSuspended(int i) {
+            // Do nothing
+        }
+    }
+
+    private class locationListener implements LocationListener {
+        @Override
+        public void onLocationChanged(Location location) {
+            if (mMapLocationListener != null) {
+                mMapLocationListener.onLocationChanged(location);
+            }
+        }
+    }
+
+    private class locationSource implements LocationSource {
+        @Override
+        public void activate(OnLocationChangedListener onLocationChangedListener) {
+            mMapLocationListener = onLocationChangedListener;
+        }
+
+        @Override
+        public void deactivate() {
+            mMapLocationListener = null;
+        }
     }
 }
