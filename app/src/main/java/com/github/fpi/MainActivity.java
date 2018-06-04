@@ -58,6 +58,10 @@ public class MainActivity extends Activity {
         tb = (ToggleButton) findViewById(R.id.toggleButton);
         tb.setChecked(settings.isStarted());
 
+        if (settings.isStarted()) {
+            startService(new Intent(this, JoystickService.class));
+        }
+
         FragmentManager fm = getFragmentManager();
         Fragment f = fm.findFragmentById(R.id.map);
         if (f instanceof MapFragment) {
@@ -129,8 +133,10 @@ public class MainActivity extends Activity {
 
         if (tb.isChecked()) {
             text = getString(R.string.location_msg) + " " + mInit.latitude + " " + mInit.longitude;
+            startService(new Intent(this, JoystickService.class));
         } else {
             text = getString(R.string.location_msg_stopped);
+            stopService(new Intent(this, JoystickService.class));
         }
 
         Toast toast = Toast.makeText(context, text, duration);

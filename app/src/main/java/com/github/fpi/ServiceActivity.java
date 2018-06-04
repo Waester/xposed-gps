@@ -49,7 +49,7 @@ public class ServiceActivity implements IXposedHookLoadPackage {
     }
 
     @Override
-    public void handleLoadPackage(LoadPackageParam loadPackageParam) throws Throwable {
+    public void handleLoadPackage(LoadPackageParam loadPackageParam) {
         settings.reload();
         HashSet<String> appsToHook = settings.getApps();
 
@@ -98,7 +98,7 @@ public class ServiceActivity implements IXposedHookLoadPackage {
     private class XMethodHook extends XC_MethodHook {
 
         @Override
-        protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+        protected void afterHookedMethod(MethodHookParam param) {
             settings.reload();
 
             /* Injection of the faked gps data */
