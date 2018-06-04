@@ -2,7 +2,6 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 17
-    buildToolsVersion "24.0.1"
 
     defaultConfig {
         applicationId "com.github.fpi"
@@ -20,7 +19,8 @@ android {
 }
 
 dependencies {
-    provided 'de.robv.android.xposed:api:82'
-    compile 'com.google.android.gms:play-services:7.0.0'
-    compile 'io.github.controlwear:virtualjoystick:1.9.2'
+    compileOnly 'de.robv.android.xposed:api:82'
+    implementation 'com.google.android.gms:play-services-location:7.0.0'
+    implementation 'com.google.android.gms:play-services-maps:7.0.0'
+    implementation 'io.github.controlwear:virtualjoystick:1.9.2'
 }
