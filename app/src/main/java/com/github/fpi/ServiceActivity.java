@@ -10,7 +10,6 @@ import android.util.Log;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Random;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
@@ -24,20 +23,6 @@ public class ServiceActivity implements IXposedHookLoadPackage {
 
     private String TAG = "FPI";
     private Settings settings = new Settings();
-    private double newLat;
-    private double newLng;
-
-    private void updateLocation() {
-        Random rand = new Random();
-
-        double earth = 6378137;
-        double min = 1 / earth * -1;
-        double max = 1 / earth * 2;
-        double dLat = min + rand.nextDouble() * max;
-        double dLng = min + rand.nextDouble() * max;
-        newLat = settings.getLat() + Math.toDegrees(dLat);
-        newLng = settings.getLng() + Math.toDegrees(dLng / Math.cos(Math.toRadians(settings.getLat())));
-    }
 
     private Bundle modifyBundle(Bundle bundle) {
         if (bundle != null) {
@@ -105,16 +90,15 @@ public class ServiceActivity implements IXposedHookLoadPackage {
 
             /* Injection of the faked gps data */
             if (settings.isStarted()) {
-                updateLocation();
 
                 switch (Methods.valueOf(param.method.getName())) {
                     case getLatitude:
-                        param.setResult(newLat);
+                        param.setResult(settings.getLat());
                         //Log.v(TAG, "getLatitude " + param.getResult());
                         break;
 
                     case getLongitude:
-                        param.setResult(newLng);
+                        param.setResult(settings.getLng());
                         //Log.v(TAG, "getLongitude " + param.getResult());
                         break;
 
