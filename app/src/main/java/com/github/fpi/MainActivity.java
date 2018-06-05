@@ -115,7 +115,7 @@ public class MainActivity extends Activity {
 
     public void setLocation(View v) {
         mInit = mMarker.getPosition();
-        settings.update(mInit.latitude, mInit.longitude, mMap.getCameraPosition().zoom, tb.isChecked());
+        settings.update(mInit.latitude, mInit.longitude, 0f, 0f, mMap.getCameraPosition().zoom, tb.isChecked());
         toastInfo();
     }
 

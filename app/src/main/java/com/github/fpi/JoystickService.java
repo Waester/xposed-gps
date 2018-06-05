@@ -49,8 +49,14 @@ public class JoystickService extends Service {
             @Override
             public void onMove(int angle, int strength) {
                 // https://www.movable-type.co.uk/scripts/latlong.html
-                double distance = (((double) strength / 100) * 4.2) / 6378137;
-                double bearing = Math.toRadians(-angle + 90);
+                double speed = ((double) strength / 100) * 4.2;
+                double distance = speed / 6378137;
+                double bearing = 0;
+                if ((360 - angle) <= 270) {
+                    bearing = Math.toRadians((360 - angle) + 90);
+                } else {
+                    bearing = Math.toRadians((360 - angle) - 270);
+                }
                 double lat1 = Math.toRadians(settings.getLat());
                 double lng1 = Math.toRadians(settings.getLng());
 
@@ -58,7 +64,7 @@ public class JoystickService extends Service {
                 double lng2 = Math.toDegrees(lng1 + Math.atan2(Math.sin(bearing) * Math.sin(distance) * Math.cos(lat1), Math.cos(distance) - Math.sin(lat1) * Math.sin(lat2)));
                 lng2 = (lng2 + 540) % 360 - 180;
 
-                settings.update(lat2,lng2,settings.getZoom(),settings.isStarted());
+                settings.update(lat2,lng2,(float)Math.toDegrees(bearing),(float)speed,settings.getZoom(),settings.isStarted());
             }
         }, 1000);
     }

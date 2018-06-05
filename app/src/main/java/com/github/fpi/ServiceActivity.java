@@ -88,6 +88,8 @@ public class ServiceActivity implements IXposedHookLoadPackage {
     private enum Methods {
         getLatitude,
         getLongitude,
+        getBearing,
+        getSpeed,
         getExtras,
         getScanResults,
         getAllCellInfo,
@@ -114,6 +116,16 @@ public class ServiceActivity implements IXposedHookLoadPackage {
                     case getLongitude:
                         param.setResult(newLng);
                         //Log.v(TAG, "getLongitude " + param.getResult());
+                        break;
+
+                    case getBearing:
+                        param.setResult(settings.getBearing());
+                        //Log.v(TAG, "getBearing " + param.getResult());
+                        break;
+
+                    case getSpeed:
+                        param.setResult(settings.getSpeed());
+                        //Log.v(TAG, "getSpeed " + param.getResult());
                         break;
 
                     case getExtras:

@@ -39,6 +39,24 @@ class Settings {
         return 114.1576900;
     }
 
+    public float getBearing() {
+        if (sharedPreferences != null) {
+            return sharedPreferences.getFloat("bearing", 0f);
+        } else if (xSharedPreferences != null) {
+            return xSharedPreferences.getFloat("bearing", 0f);
+        }
+        return 0f;
+    }
+
+    public float getSpeed() {
+        if (sharedPreferences != null) {
+            return sharedPreferences.getFloat("speed", 0f);
+        } else if (xSharedPreferences != null) {
+            return xSharedPreferences.getFloat("speed", 0f);
+        }
+        return 0f;
+    }
+
     public float getZoom() {
         if (sharedPreferences != null) {
             return sharedPreferences.getFloat("zoom", 12f);
@@ -71,11 +89,13 @@ class Settings {
         return false;
     }
 
-    public void update(double la, double ln, float zm, boolean start) {
+    public void update(double latitude, double longitude, float bearing, float speed, float zoom, boolean start) {
         SharedPreferences.Editor prefEditor = sharedPreferences.edit();
-        prefEditor.putLong("latitude", Double.doubleToRawLongBits(la));
-        prefEditor.putLong("longitude", Double.doubleToRawLongBits(ln));
-        prefEditor.putFloat("zoom", zm);
+        prefEditor.putLong("latitude", Double.doubleToRawLongBits(latitude));
+        prefEditor.putLong("longitude", Double.doubleToRawLongBits(longitude));
+        prefEditor.putFloat("bearing", bearing);
+        prefEditor.putFloat("speed", speed);
+        prefEditor.putFloat("zoom", zoom);
         prefEditor.putBoolean("start", start);
         prefEditor.apply();
     }
