@@ -1,5 +1,8 @@
 package com.github.fpi;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -16,9 +19,10 @@ public class JoystickService extends Service {
 
     private WindowManager windowManager;
     private LayoutInflater layoutInflater;
-    private View joystickView;
+    private NotificationManager notificationManager;
+    private static View joystickView;
     private WindowManager.LayoutParams joystickViewParams;
-    private Settings settings = null;
+    private Settings settings;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -51,7 +55,7 @@ public class JoystickService extends Service {
                 // https://www.movable-type.co.uk/scripts/latlong.html
                 double speed = ((double) strength / 100) * 4.2;
                 double distance = speed / 6378137;
-                double bearing = 0;
+                double bearing;
                 if ((360 - angle) <= 270) {
                     bearing = Math.toRadians((360 - angle) + 90);
                 } else {
@@ -67,11 +71,36 @@ public class JoystickService extends Service {
                 settings.update(lat2,lng2,(float)Math.toDegrees(bearing),(float)speed,settings.getZoom(),settings.isStarted());
             }
         }, 1000);
+
+        Intent hideJoystick = new Intent();
+        hideJoystick.setAction(AppConstant.TOGGLE_ACTION);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this,0, hideJoystick, 0);
+
+        Notification notification = new Notification.Builder(this)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle("Joystick")
+                .setContentText("Press to toggle joystick visibility.")
+                .setContentIntent(pendingIntent)
+                .setPriority(Notification.PRIORITY_MIN)
+                .setOngoing(true)
+                .build();
+
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(1, notification);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         windowManager.removeView(joystickView);
+        notificationManager.cancel(1);
+    }
+
+    public static void toggleJoystick() {
+        if (joystickView.getVisibility() == View.VISIBLE) {
+            joystickView.setVisibility(View.GONE);
+        } else {
+            joystickView.setVisibility(View.VISIBLE);
+        }
     }
 }

@@ -33,6 +33,12 @@
 
         <service android:name=".JoystickService" />
 
+        <receiver android:name=".NotificationReceiver">
+            <intent-filter>
+                <action android:name="TOGGLE_ACTION"/>
+            </intent-filter>
+        </receiver>
+
         <meta-data
             android:name="xposedmodule"
             android:value="true" />
