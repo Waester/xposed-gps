@@ -53,7 +53,7 @@ public class JoystickService extends Service {
             @Override
             public void onMove(int angle, int strength) {
                 // https://www.movable-type.co.uk/scripts/latlong.html
-                double speed = ((double) strength / 100) * 4.2;
+                double speed = ((double) strength / 100) * 1.4;
                 double distance = speed / 6378137;
                 double bearing;
                 if ((360 - angle) <= 270) {
