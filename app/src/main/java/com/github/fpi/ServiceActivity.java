@@ -1,14 +1,8 @@
 package com.github.fpi;
 
-import android.net.wifi.ScanResult;
-import android.os.Bundle;
-import android.telephony.CellInfo;
-import android.telephony.CellLocation;
-import android.telephony.NeighboringCellInfo;
 import android.util.Log;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashSet;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
@@ -24,15 +18,6 @@ public class ServiceActivity implements IXposedHookLoadPackage {
     private String TAG = "FPI";
     private Settings settings = new Settings();
 
-    private Bundle modifyBundle(Bundle bundle) {
-        if (bundle != null) {
-            if (bundle.containsKey("wifiScan")) {
-                bundle.remove("wifiScan");
-            }
-        }
-        return bundle;
-    }
-
     @Override
     public void handleLoadPackage(LoadPackageParam loadPackageParam) {
         settings.reload();
@@ -41,8 +26,6 @@ public class ServiceActivity implements IXposedHookLoadPackage {
         if (appsToHook.contains(loadPackageParam.packageName)) {
             HashSet<String> Classes = new HashSet<String>();
             Classes.add("android.location.Location");
-            Classes.add("android.net.wifi.WifiManager");
-            Classes.add("android.telephony.TelephonyManager");
 
             HashSet<String> methodsToHook = new HashSet<String>();
             for (Methods method : Methods.values()) {
@@ -74,12 +57,7 @@ public class ServiceActivity implements IXposedHookLoadPackage {
         getLatitude,
         getLongitude,
         getBearing,
-        getSpeed,
-        getExtras,
-        getScanResults,
-        getAllCellInfo,
-        getCellLocation,
-        getNeighboringCellInfo
+        getSpeed
     }
 
     private class XMethodHook extends XC_MethodHook {
@@ -110,40 +88,6 @@ public class ServiceActivity implements IXposedHookLoadPackage {
                     case getSpeed:
                         param.setResult(settings.getSpeed());
                         //Log.v(TAG, "getSpeed " + param.getResult());
-                        break;
-
-                    case getExtras:
-                        Bundle bundle = (Bundle) param.getResult();
-                        param.setResult(modifyBundle(bundle));
-                        //Log.v(TAG, "getExtras " + param.getResult());
-                        break;
-
-                    case getScanResults:
-                        if (param.getResult() != null) {
-                            param.setResult(new ArrayList<ScanResult>());
-                            //Log.v(TAG, "getScanResults " + param.getResult());
-                        }
-                        break;
-
-                    case getAllCellInfo:
-                        if (param.getResult() != null) {
-                            param.setResult(new ArrayList<CellInfo>());
-                            //Log.v(TAG, "getAllCellInfo " + param.getResult());
-                        }
-                        break;
-
-                    case getCellLocation:
-                        if (param.getResult() != null) {
-                            param.setResult(CellLocation.getEmpty());
-                            //Log.v(TAG, "getCellLocation " + param.getResult());
-                        }
-                        break;
-
-                    case getNeighboringCellInfo:
-                        if (param.getResult() != null) {
-                            param.setResult(new ArrayList<NeighboringCellInfo>());
-                            //Log.v(TAG, "getNeighboringCellInfo " + param.getResult());
-                        }
                         break;
                 }
             }

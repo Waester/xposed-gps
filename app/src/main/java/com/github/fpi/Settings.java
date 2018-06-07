@@ -68,7 +68,6 @@ class Settings {
 
     public HashSet<String> getApps() {
         HashSet<String> defaultApps = new HashSet<String>();
-        defaultApps.add("com.nianticlabs.pokemongo");
         defaultApps.add("com.nianticproject.ingress");
 
         if (sharedPreferences != null) {
