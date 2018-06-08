@@ -7,7 +7,7 @@ import android.content.Intent;
 public class NotificationReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (AppConstant.TOGGLE_ACTION.equals(intent.getAction())) {
+        if (Constant.TOGGLE_ACTION.equals(intent.getAction())) {
             JoystickService.toggleJoystick();
         }
     }

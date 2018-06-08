@@ -77,7 +77,7 @@ public class JoystickService extends Service {
         }, 1000);
 
         Intent hideJoystick = new Intent();
-        hideJoystick.setAction(AppConstant.TOGGLE_ACTION);
+        hideJoystick.setAction(Constant.TOGGLE_ACTION);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this,0, hideJoystick, 0);
 
         Notification notification = new Notification.Builder(this)

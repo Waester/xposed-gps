@@ -35,7 +35,7 @@
 
         <receiver android:name=".NotificationReceiver">
             <intent-filter>
-                <action android:name="TOGGLE_ACTION"/>
+                <action android:name="com.github.fpi.Constant.TOGGLE_ACTION"/>
             </intent-filter>
         </receiver>
 
