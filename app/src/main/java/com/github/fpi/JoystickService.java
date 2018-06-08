@@ -61,14 +61,18 @@ public class JoystickService extends Service {
                 } else {
                     bearing = Math.toRadians((360 - angle) - 270);
                 }
-                double lat1 = Math.toRadians(settings.getLat());
-                double lng1 = Math.toRadians(settings.getLng());
+                double lat1 = Math.toRadians(settings.LATITUDE);
+                double lng1 = Math.toRadians(settings.LONGITUDE);
 
                 double lat2 = Math.toDegrees(Math.asin(Math.sin(lat1) * Math.cos(distance) + Math.cos(lat1) * Math.sin(distance) * Math.cos(bearing)));
                 double lng2 = Math.toDegrees(lng1 + Math.atan2(Math.sin(bearing) * Math.sin(distance) * Math.cos(lat1), Math.cos(distance) - Math.sin(lat1) * Math.sin(lat2)));
                 lng2 = (lng2 + 540) % 360 - 180;
 
-                settings.update(lat2,lng2,(float)Math.toDegrees(bearing),(float)speed,settings.getZoom(),settings.isStarted());
+                settings.LATITUDE = lat2;
+                settings.LONGITUDE = lng2;
+                settings.BEARING = (float) Math.toDegrees(bearing);
+                settings.SPEED = (float) speed;
+                settings.update();
             }
         }, 1000);
 

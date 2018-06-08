@@ -12,12 +12,11 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 
 public class AppChooser extends Activity {
 
-    private Settings settings = null;
+    private Settings settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +57,7 @@ public class AppChooser extends Activity {
     }
 
     private void refreshAppList() {
-        List<String> Apps = new ArrayList<String>(settings.getApps());
+        List<String> Apps = new ArrayList<String>(settings.APPS);
         Collections.sort(Apps);
 
         TextView tv = (TextView) findViewById(R.id.hookedApps);
@@ -82,13 +81,12 @@ public class AppChooser extends Activity {
         String appName = editAppName.getText().toString();
 
         if (!TextUtils.isEmpty(appName)) {
-            HashSet<String> Apps = settings.getApps();
-            if (!Apps.contains(appName)) {
-                Apps.add(appName);
+            if (!settings.APPS.contains(appName)) {
+                settings.APPS.add(appName);
             } else {
-                Apps.remove(appName);
+                settings.APPS.remove(appName);
             }
-            settings.updateApps(Apps);
+            settings.updateApps(settings.APPS);
 
             refreshAppList();
         }

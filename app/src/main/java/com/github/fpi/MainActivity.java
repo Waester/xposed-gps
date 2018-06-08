@@ -37,14 +37,14 @@ import java.util.Locale;
 
 public class MainActivity extends Activity {
 
-    private MarkerOptions mMarker = null;
-    private GoogleMap mMap = null;
-    private LatLng mInit = null;
-    private Settings settings = null;
-    private CameraUpdate cam = null;
-    private ToggleButton tb = null;
-    private GoogleApiClient mGoogleApiClient = null;
-    private OnLocationChangedListener mMapLocationListener = null;
+    private MarkerOptions mMarker;
+    private GoogleMap mMap;
+    private LatLng mInit;
+    private Settings settings;
+    private CameraUpdate cam;
+    private ToggleButton tb;
+    private GoogleApiClient mGoogleApiClient;
+    private OnLocationChangedListener mMapLocationListener;
     private LocationRequest locationRequest = LocationRequest.create()
             .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
@@ -56,9 +56,9 @@ public class MainActivity extends Activity {
         settings = new Settings(getApplicationContext());
 
         tb = (ToggleButton) findViewById(R.id.toggleButton);
-        tb.setChecked(settings.isStarted());
+        tb.setChecked(settings.START);
 
-        if (settings.isStarted()) {
+        if (settings.START) {
             startService(new Intent(this, JoystickService.class));
         }
 
@@ -71,10 +71,10 @@ public class MainActivity extends Activity {
             mMap.setLocationSource(new locationSource());
             mMap.getUiSettings().setZoomControlsEnabled(true);
             mMarker = new MarkerOptions();
-            mInit = new LatLng(settings.getLat(), settings.getLng());
+            mInit = new LatLng(settings.LATITUDE, settings.LONGITUDE);
             mMarker.position(mInit);
 
-            cam = CameraUpdateFactory.newLatLngZoom(mInit, settings.getZoom());
+            cam = CameraUpdateFactory.newLatLngZoom(mInit, settings.ZOOM);
             mMap.moveCamera(cam);
             mMap.addMarker(mMarker);
 
@@ -113,15 +113,24 @@ public class MainActivity extends Activity {
         mGoogleApiClient.disconnect();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopService(new Intent(this, JoystickService.class));
+    }
+
     public void setLocation(View v) {
         mInit = mMarker.getPosition();
-        settings.update(mInit.latitude, mInit.longitude, 0f, 0f, mMap.getCameraPosition().zoom, tb.isChecked());
+        settings.LATITUDE = mInit.latitude;
+        settings.LONGITUDE =  mInit.longitude;
+        settings.ZOOM = mMap.getCameraPosition().zoom;
+        settings.START = tb.isChecked();
+        settings.update();
         toastInfo();
     }
 
     public void selectApps(View v) {
-        Intent i = new Intent(getApplicationContext(), AppChooser.class);
-        startActivity(i);
+        startActivity(new Intent(getApplicationContext(), AppChooser.class));
     }
 
     private void toastInfo() {

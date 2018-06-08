@@ -1,7 +1,5 @@
 package com.github.fpi;
 
-import android.util.Log;
-
 import java.lang.reflect.Method;
 import java.util.HashSet;
 
@@ -42,14 +40,14 @@ public class ServiceActivity implements IXposedHookLoadPackage {
                     for (Method method : hookClass.getDeclaredMethods()) {
                         if (methodsToHook.contains(method.getName())) {
                             XposedBridge.hookMethod(method, methodHook);
-                            //Log.v(TAG, "Hooking method " + method.getName());
+                            //Log.d(TAG, "Hooking method " + method.getName());
                         }
                     }
                 } catch (ClassNotFoundError ex) {
-                    Log.e(TAG, "Class " + clazz + " not found");
+                    //Log.d(TAG, "Class " + clazz + " not found");
                 }
             }
-            Log.i(TAG, loadPackageParam.packageName + " successfully hooked");
+            //Log.d(TAG, loadPackageParam.packageName + " successfully hooked");
         }
     }
 
@@ -67,27 +65,27 @@ public class ServiceActivity implements IXposedHookLoadPackage {
             settings.reload();
 
             /* Injection of the faked gps data */
-            if (settings.isStarted()) {
+            if (settings.getStart()) {
 
                 switch (Methods.valueOf(param.method.getName())) {
                     case getLatitude:
-                        param.setResult(settings.getLat());
-                        //Log.v(TAG, "getLatitude " + param.getResult());
+                        param.setResult(settings.getLatitude());
+                        //Log.d(TAG, "getLatitude " + param.getResult());
                         break;
 
                     case getLongitude:
-                        param.setResult(settings.getLng());
-                        //Log.v(TAG, "getLongitude " + param.getResult());
+                        param.setResult(settings.getLongitude());
+                        //Log.d(TAG, "getLongitude " + param.getResult());
                         break;
 
                     case getBearing:
                         param.setResult(settings.getBearing());
-                        //Log.v(TAG, "getBearing " + param.getResult());
+                        //Log.d(TAG, "getBearing " + param.getResult());
                         break;
 
                     case getSpeed:
                         param.setResult(settings.getSpeed());
-                        //Log.v(TAG, "getSpeed " + param.getResult());
+                        //Log.d(TAG, "getSpeed " + param.getResult());
                         break;
                 }
             }

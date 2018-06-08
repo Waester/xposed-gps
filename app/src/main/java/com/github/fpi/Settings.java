@@ -10,97 +10,70 @@ import de.robv.android.xposed.XSharedPreferences;
 class Settings {
 
     private String TAG = "FPI";
-    private XSharedPreferences xSharedPreferences = null;
-    private SharedPreferences sharedPreferences = null;
+    private SharedPreferences sharedPreferences;
+    private XSharedPreferences xSharedPreferences;
+    private SharedPreferences.Editor prefEditor;
+
+    public double LATITUDE = 22.2855200;
+    public double LONGITUDE = 114.1576900;
+    public float BEARING = 0.0f;
+    public float SPEED = 0.0f;
+    public float ZOOM = 12.0f;
+    public boolean START = false;
+    public HashSet<String> APPS = new HashSet<String>();
+
+    public Settings(Context context) {
+        sharedPreferences = context.getSharedPreferences(context.getPackageName() + "_preferences", Context.MODE_WORLD_READABLE);
+        prefEditor = sharedPreferences.edit();
+
+        LATITUDE = Double.longBitsToDouble(sharedPreferences.getLong("latitude", Double.doubleToRawLongBits(LATITUDE)));
+        LONGITUDE = Double.longBitsToDouble(sharedPreferences.getLong("longitude", Double.doubleToRawLongBits(LONGITUDE)));
+        ZOOM = sharedPreferences.getFloat("zoom", ZOOM);
+        START = sharedPreferences.getBoolean("start", START);
+        APPS = (HashSet<String>) sharedPreferences.getStringSet("apps", APPS);
+    }
 
     public Settings() {
         xSharedPreferences = new XSharedPreferences(MainActivity.class.getPackage().getName());
+        xSharedPreferences.getFile().setReadable(true, false);
+        //Log.d(TAG, "XSharedPreferences INIT " + xSharedPreferences.getAll().toString());
     }
 
-    public Settings(Context context) {
-        sharedPreferences = context.getSharedPreferences(MainActivity.class.getPackage().getName() + "_preferences", Context.MODE_WORLD_READABLE);
+    public double getLatitude() {
+        return Double.longBitsToDouble(xSharedPreferences.getLong("latitude", Double.doubleToRawLongBits(LATITUDE)));
     }
 
-    public double getLat() {
-        if (sharedPreferences != null) {
-            return Double.longBitsToDouble(sharedPreferences.getLong("latitude", Double.doubleToRawLongBits(22.2855200)));
-        } else if (xSharedPreferences != null) {
-            return Double.longBitsToDouble(xSharedPreferences.getLong("latitude", Double.doubleToRawLongBits(22.2855200)));
-        }
-        return 22.2855200;
-    }
-
-    public double getLng() {
-        if (sharedPreferences != null) {
-            return Double.longBitsToDouble(sharedPreferences.getLong("longitude", Double.doubleToRawLongBits(114.1576900)));
-        } else if (xSharedPreferences != null) {
-            return Double.longBitsToDouble(xSharedPreferences.getLong("longitude", Double.doubleToRawLongBits(114.1576900)));
-        }
-        return 114.1576900;
+    public double getLongitude() {
+        return Double.longBitsToDouble(xSharedPreferences.getLong("longitude", Double.doubleToRawLongBits(LONGITUDE)));
     }
 
     public float getBearing() {
-        if (sharedPreferences != null) {
-            return sharedPreferences.getFloat("bearing", 0f);
-        } else if (xSharedPreferences != null) {
-            return xSharedPreferences.getFloat("bearing", 0f);
-        }
-        return 0f;
+        return xSharedPreferences.getFloat("bearing", BEARING);
     }
 
     public float getSpeed() {
-        if (sharedPreferences != null) {
-            return sharedPreferences.getFloat("speed", 0f);
-        } else if (xSharedPreferences != null) {
-            return xSharedPreferences.getFloat("speed", 0f);
-        }
-        return 0f;
+        return xSharedPreferences.getFloat("speed", SPEED);
     }
 
-    public float getZoom() {
-        if (sharedPreferences != null) {
-            return sharedPreferences.getFloat("zoom", 12f);
-        } else if (xSharedPreferences != null) {
-            return xSharedPreferences.getFloat("zoom", 12f);
-        }
-        return 12f;
+    public boolean getStart() {
+        return xSharedPreferences.getBoolean("start", START);
     }
 
     public HashSet<String> getApps() {
-        HashSet<String> defaultApps = new HashSet<String>();
-        defaultApps.add("com.nianticproject.ingress");
-
-        if (sharedPreferences != null) {
-            return (HashSet<String>) sharedPreferences.getStringSet("apps", defaultApps);
-        } else if (xSharedPreferences != null) {
-            return (HashSet<String>) xSharedPreferences.getStringSet("apps", defaultApps);
-        }
-
-        return defaultApps;
+        return (HashSet<String>) xSharedPreferences.getStringSet("apps", APPS);
     }
 
-    public boolean isStarted() {
-        if (sharedPreferences != null) {
-            return sharedPreferences.getBoolean("start", false);
-        } else if (xSharedPreferences != null) {
-            return xSharedPreferences.getBoolean("start", false);
-        }
-        return false;
-    }
-
-    public void update(double latitude, double longitude, float bearing, float speed, float zoom, boolean start) {
-        SharedPreferences.Editor prefEditor = sharedPreferences.edit();
-        prefEditor.putLong("latitude", Double.doubleToRawLongBits(latitude));
-        prefEditor.putLong("longitude", Double.doubleToRawLongBits(longitude));
-        prefEditor.putFloat("bearing", bearing);
-        prefEditor.putFloat("speed", speed);
-        prefEditor.putFloat("zoom", zoom);
-        prefEditor.putBoolean("start", start);
+    public void update() {
+        prefEditor.putLong("latitude", Double.doubleToRawLongBits(LATITUDE));
+        prefEditor.putLong("longitude", Double.doubleToRawLongBits(LONGITUDE));
+        prefEditor.putFloat("bearing", BEARING);
+        prefEditor.putFloat("speed", SPEED);
+        prefEditor.putFloat("zoom", ZOOM);
+        prefEditor.putBoolean("start", START);
         prefEditor.apply();
     }
 
     public void updateApps(HashSet<String> Apps) {
-        SharedPreferences.Editor prefEditor = sharedPreferences.edit();
         // Workaround Set bug
         prefEditor.remove("apps");
         prefEditor.apply();
@@ -110,6 +83,6 @@ class Settings {
 
     public void reload() {
         xSharedPreferences.reload();
-        //Log.d(TAG, "XSharedPreferences " + xSharedPreferences.getAll().toString());
+        //Log.d(TAG, "XSharedPreferences RELOAD " + xSharedPreferences.getAll().toString());
     }
 }
