@@ -1,4 +1,6 @@
-package com.github.fpi;
+package com.github.fpi.hooks;
+
+import com.github.fpi.settings.XPreferences;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -11,15 +13,15 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 import static de.robv.android.xposed.XposedHelpers.findClass;
 
-public class ServiceActivity implements IXposedHookLoadPackage {
+public class GPS implements IXposedHookLoadPackage {
 
     private String TAG = "FPI";
-    private Settings settings = new Settings();
+    private XPreferences xPreferences = new XPreferences();
 
     @Override
     public void handleLoadPackage(LoadPackageParam loadPackageParam) {
-        settings.reload();
-        HashSet<String> appsToHook = settings.getApps();
+        xPreferences.load();
+        HashSet<String> appsToHook = xPreferences.APPS;
 
         if (appsToHook.contains(loadPackageParam.packageName)) {
             HashSet<String> Classes = new HashSet<String>();
@@ -62,29 +64,29 @@ public class ServiceActivity implements IXposedHookLoadPackage {
 
         @Override
         protected void afterHookedMethod(MethodHookParam param) {
-            settings.reload();
+            xPreferences.load();
 
             /* Injection of the faked gps data */
-            if (settings.getStart()) {
+            if (xPreferences.START) {
 
                 switch (Methods.valueOf(param.method.getName())) {
                     case getLatitude:
-                        param.setResult(settings.getLatitude());
+                        param.setResult(xPreferences.LATITUDE);
                         //Log.d(TAG, "getLatitude " + param.getResult());
                         break;
 
                     case getLongitude:
-                        param.setResult(settings.getLongitude());
+                        param.setResult(xPreferences.LONGITUDE);
                         //Log.d(TAG, "getLongitude " + param.getResult());
                         break;
 
                     case getBearing:
-                        param.setResult(settings.getBearing());
+                        param.setResult(xPreferences.BEARING);
                         //Log.d(TAG, "getBearing " + param.getResult());
                         break;
 
                     case getSpeed:
-                        param.setResult(settings.getSpeed());
+                        param.setResult(xPreferences.SPEED);
                         //Log.d(TAG, "getSpeed " + param.getResult());
                         break;
                 }

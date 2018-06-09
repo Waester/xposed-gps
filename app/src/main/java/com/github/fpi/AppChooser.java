@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.github.fpi.settings.Preferences;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,14 +18,15 @@ import java.util.List;
 
 public class AppChooser extends Activity {
 
-    private Settings settings;
+    private Preferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_chooser);
 
-        settings = new Settings(getApplicationContext());
+        preferences = new Preferences(getApplicationContext());
+        preferences.load();
 
         installedApps();
         refreshAppList();
@@ -57,7 +60,7 @@ public class AppChooser extends Activity {
     }
 
     private void refreshAppList() {
-        List<String> Apps = new ArrayList<String>(settings.APPS);
+        List<String> Apps = new ArrayList<String>(preferences.APPS);
         Collections.sort(Apps);
 
         TextView tv = (TextView) findViewById(R.id.hookedApps);
@@ -81,12 +84,12 @@ public class AppChooser extends Activity {
         String appName = editAppName.getText().toString();
 
         if (!TextUtils.isEmpty(appName)) {
-            if (!settings.APPS.contains(appName)) {
-                settings.APPS.add(appName);
+            if (!preferences.APPS.contains(appName)) {
+                preferences.APPS.add(appName);
             } else {
-                settings.APPS.remove(appName);
+                preferences.APPS.remove(appName);
             }
-            settings.updateApps(settings.APPS);
+            preferences.updateApps(preferences.APPS);
 
             refreshAppList();
         }

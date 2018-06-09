@@ -33,9 +33,9 @@
 
         <service android:name=".JoystickService" />
 
-        <receiver android:name=".NotificationReceiver">
+        <receiver android:name=".ActionReceiver">
             <intent-filter>
-                <action android:name="com.github.fpi.Constant.TOGGLE_ACTION"/>
+                <action android:name="com.github.fpi.settings.Constants.TOGGLE_ACTION"/>
             </intent-filter>
         </receiver>
 

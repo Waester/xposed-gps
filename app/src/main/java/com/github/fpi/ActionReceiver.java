@@ -4,10 +4,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-public class NotificationReceiver extends BroadcastReceiver {
+import com.github.fpi.settings.Constants;
+
+public class ActionReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (Constant.TOGGLE_ACTION.equals(intent.getAction())) {
+        if (Constants.TOGGLE_ACTION.equals(intent.getAction())) {
             JoystickService.toggleJoystick();
         }
     }

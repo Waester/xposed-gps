@@ -13,6 +13,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.github.fpi.settings.Constants;
+import com.github.fpi.settings.Preferences;
+
 import io.github.controlwear.virtual.joystick.android.JoystickView;
 
 public class JoystickService extends Service {
@@ -22,7 +25,7 @@ public class JoystickService extends Service {
     private NotificationManager notificationManager;
     private static View joystickView;
     private WindowManager.LayoutParams joystickViewParams;
-    private Settings settings;
+    private Preferences preferences;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -32,7 +35,7 @@ public class JoystickService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        settings = new Settings(getApplicationContext());
+        preferences = new Preferences(getApplicationContext());
 
         joystickViewParams = new WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -52,6 +55,8 @@ public class JoystickService extends Service {
         joystick.setOnMoveListener(new JoystickView.OnMoveListener() {
             @Override
             public void onMove(int angle, int strength) {
+                preferences.load();
+
                 // https://www.movable-type.co.uk/scripts/latlong.html
                 double speed = ((double) strength / 100) * 1.4;
                 double distance = speed / 6378137;
@@ -61,23 +66,23 @@ public class JoystickService extends Service {
                 } else {
                     bearing = Math.toRadians((360 - angle) - 270);
                 }
-                double lat1 = Math.toRadians(settings.LATITUDE);
-                double lng1 = Math.toRadians(settings.LONGITUDE);
+                double lat1 = Math.toRadians(preferences.LATITUDE);
+                double lng1 = Math.toRadians(preferences.LONGITUDE);
 
                 double lat2 = Math.toDegrees(Math.asin(Math.sin(lat1) * Math.cos(distance) + Math.cos(lat1) * Math.sin(distance) * Math.cos(bearing)));
                 double lng2 = Math.toDegrees(lng1 + Math.atan2(Math.sin(bearing) * Math.sin(distance) * Math.cos(lat1), Math.cos(distance) - Math.sin(lat1) * Math.sin(lat2)));
                 lng2 = (lng2 + 540) % 360 - 180;
 
-                settings.LATITUDE = lat2;
-                settings.LONGITUDE = lng2;
-                settings.BEARING = (float) Math.toDegrees(bearing);
-                settings.SPEED = (float) speed;
-                settings.update();
+                preferences.LATITUDE = lat2;
+                preferences.LONGITUDE = lng2;
+                preferences.BEARING = (float) Math.toDegrees(bearing);
+                preferences.SPEED = (float) speed;
+                preferences.update();
             }
         }, 1000);
 
         Intent hideJoystick = new Intent();
-        hideJoystick.setAction(Constant.TOGGLE_ACTION);
+        hideJoystick.setAction(Constants.TOGGLE_ACTION);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this,0, hideJoystick, 0);
 
         Notification notification = new Notification.Builder(this)

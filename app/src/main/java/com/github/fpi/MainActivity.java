@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.github.fpi.settings.Preferences;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.location.LocationListener;
@@ -40,7 +41,7 @@ public class MainActivity extends Activity {
     private MarkerOptions mMarker;
     private GoogleMap mMap;
     private LatLng mInit;
-    private Settings settings;
+    private Preferences preferences;
     private CameraUpdate cam;
     private ToggleButton tb;
     private GoogleApiClient mGoogleApiClient;
@@ -53,12 +54,13 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        settings = new Settings(getApplicationContext());
+        preferences = new Preferences(getApplicationContext());
+        preferences.load();
 
         tb = (ToggleButton) findViewById(R.id.toggleButton);
-        tb.setChecked(settings.START);
+        tb.setChecked(preferences.START);
 
-        if (settings.START) {
+        if (preferences.START) {
             startService(new Intent(this, JoystickService.class));
         }
 
@@ -71,10 +73,10 @@ public class MainActivity extends Activity {
             mMap.setLocationSource(new locationSource());
             mMap.getUiSettings().setZoomControlsEnabled(true);
             mMarker = new MarkerOptions();
-            mInit = new LatLng(settings.LATITUDE, settings.LONGITUDE);
+            mInit = new LatLng(preferences.LATITUDE, preferences.LONGITUDE);
             mMarker.position(mInit);
 
-            cam = CameraUpdateFactory.newLatLngZoom(mInit, settings.ZOOM);
+            cam = CameraUpdateFactory.newLatLngZoom(mInit, preferences.ZOOM);
             mMap.moveCamera(cam);
             mMap.addMarker(mMarker);
 
@@ -121,11 +123,11 @@ public class MainActivity extends Activity {
 
     public void setLocation(View v) {
         mInit = mMarker.getPosition();
-        settings.LATITUDE = mInit.latitude;
-        settings.LONGITUDE =  mInit.longitude;
-        settings.ZOOM = mMap.getCameraPosition().zoom;
-        settings.START = tb.isChecked();
-        settings.update();
+        preferences.LATITUDE = mInit.latitude;
+        preferences.LONGITUDE =  mInit.longitude;
+        preferences.ZOOM = mMap.getCameraPosition().zoom;
+        preferences.START = tb.isChecked();
+        preferences.update();
         toastInfo();
     }
 
