@@ -1,6 +1,7 @@
 package com.github.fpi;
 
 import android.app.Activity;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -33,10 +34,16 @@ public class AppChooser extends Activity {
     }
 
     private void installedApps() {
-        List<PackageInfo> Apps = getPackageManager().getInstalledPackages(0);
+        List<PackageInfo> installedPackages = new ArrayList<PackageInfo>();
+
+        for (PackageInfo packageInfo : getPackageManager().getInstalledPackages(0)) {
+            if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 1) {
+                installedPackages.add(packageInfo);
+            }
+        }
 
         // Sort list
-        Collections.sort(Apps, new Comparator<PackageInfo>() {
+        Collections.sort(installedPackages, new Comparator<PackageInfo>() {
             @Override
             public int compare(PackageInfo p1, PackageInfo p2) {
                 return String.CASE_INSENSITIVE_ORDER.compare(p1.packageName, p2.packageName);
@@ -46,7 +53,7 @@ public class AppChooser extends Activity {
         TextView tv = (TextView) findViewById(R.id.installedApps);
         tv.setText("");
 
-        for (PackageInfo appName : Apps) {
+        for (PackageInfo appName : installedPackages) {
             tv.append(appName.packageName + "\n");
         }
 
