@@ -3,7 +3,6 @@ package com.github.fpi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
@@ -12,7 +11,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.github.fpi.settings.Preferences;
@@ -123,35 +121,22 @@ public class MainActivity extends Activity {
 
     public void setLocation(View v) {
         mInit = mMarker.getPosition();
+
         preferences.LATITUDE = mInit.latitude;
         preferences.LONGITUDE =  mInit.longitude;
         preferences.ZOOM = mMap.getCameraPosition().zoom;
         preferences.START = tb.isChecked();
         preferences.update();
-        toastInfo();
+
+        if (tb.isChecked()) {
+            startService(new Intent(this, JoystickService.class));
+        } else {
+            stopService(new Intent(this, JoystickService.class));
+        }
     }
 
     public void selectApps(View v) {
         startActivity(new Intent(getApplicationContext(), AppChooser.class));
-    }
-
-    private void toastInfo() {
-        int duration = Toast.LENGTH_SHORT;
-        CharSequence text;
-
-        ToggleButton tb = (ToggleButton) findViewById(R.id.toggleButton);
-        Context context = getApplicationContext();
-
-        if (tb.isChecked()) {
-            text = getString(R.string.location_msg) + " " + mInit.latitude + " " + mInit.longitude;
-            startService(new Intent(this, JoystickService.class));
-        } else {
-            text = getString(R.string.location_msg_stopped);
-            stopService(new Intent(this, JoystickService.class));
-        }
-
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
     }
 
     public void searchAddress(View v) {
