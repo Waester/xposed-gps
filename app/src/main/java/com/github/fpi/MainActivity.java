@@ -71,12 +71,6 @@ public class MainActivity extends Activity {
             mMap.setLocationSource(new locationSource());
             mMap.getUiSettings().setZoomControlsEnabled(true);
             mMarker = new MarkerOptions();
-            mInit = new LatLng(preferences.LATITUDE, preferences.LONGITUDE);
-            mMarker.position(mInit);
-
-            cam = CameraUpdateFactory.newLatLngZoom(mInit, preferences.ZOOM);
-            mMap.moveCamera(cam);
-            mMap.addMarker(mMarker);
 
             mMap.setOnMarkerClickListener(new OnMarkerClickListener() {
                 @Override
@@ -104,6 +98,16 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        preferences.load();
+        mInit = new LatLng(preferences.LATITUDE, preferences.LONGITUDE);
+
+        mMarker.position(mInit);
+        cam = CameraUpdateFactory.newLatLngZoom(mInit, preferences.ZOOM);
+
+        mMap.clear();
+        mMap.moveCamera(cam);
+        mMap.addMarker(mMarker);
+
         mGoogleApiClient.connect();
     }
 
