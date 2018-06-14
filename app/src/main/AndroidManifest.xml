@@ -33,12 +33,6 @@
 
         <service android:name=".JoystickService" />
 
-        <receiver android:name=".ActionReceiver">
-            <intent-filter>
-                <action android:name="com.github.fpi.settings.Constants.TOGGLE_ACTION"/>
-            </intent-filter>
-        </receiver>
-
         <meta-data
             android:name="xposedmodule"
             android:value="true" />

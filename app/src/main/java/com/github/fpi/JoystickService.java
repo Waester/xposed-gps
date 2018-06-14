@@ -4,8 +4,10 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.view.Gravity;
@@ -23,9 +25,11 @@ public class JoystickService extends Service {
     private WindowManager windowManager;
     private LayoutInflater layoutInflater;
     private NotificationManager notificationManager;
-    private static View joystickView;
+    private View joystickView;
     private WindowManager.LayoutParams joystickViewParams;
     private Preferences preferences;
+    private BroadcastReceiver broadcastReceiver;
+    private IntentFilter intentFilter;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -58,8 +62,8 @@ public class JoystickService extends Service {
                 preferences.load();
 
                 // https://www.movable-type.co.uk/scripts/latlong.html
-                double speed = ((double) strength / 100) * 1.4;
-                double distance = speed / 6378137;
+                double speed = ((double) strength / 100) * Constants.WALKING_SPEED;
+                double distance = speed / Constants.EARTH_RADIUS;
                 double bearing;
                 if ((360 - angle) <= 270) {
                     bearing = Math.toRadians((360 - angle) + 90);
@@ -81,6 +85,12 @@ public class JoystickService extends Service {
             }
         }, 1000);
 
+        intentFilter = new IntentFilter();
+        intentFilter.addAction(Constants.TOGGLE_ACTION);
+
+        broadcastReceiver = new ActionReceiver();
+        registerReceiver(broadcastReceiver, intentFilter);
+
         Intent hideJoystick = new Intent();
         hideJoystick.setAction(Constants.TOGGLE_ACTION);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this,0, hideJoystick, 0);
@@ -95,21 +105,31 @@ public class JoystickService extends Service {
                 .build();
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(1, notification);
+        notificationManager.notify(Constants.NOTIFICATION_ID, notification);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         windowManager.removeView(joystickView);
-        notificationManager.cancel(1);
+        notificationManager.cancel(Constants.NOTIFICATION_ID);
+        unregisterReceiver(broadcastReceiver);
     }
 
-    public static void toggleJoystick() {
+    public void toggleJoystick() {
         if (joystickView.getVisibility() == View.VISIBLE) {
             joystickView.setVisibility(View.GONE);
         } else {
             joystickView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public class ActionReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Constants.TOGGLE_ACTION.equals(intent.getAction())) {
+                toggleJoystick();
+            }
         }
     }
 }
