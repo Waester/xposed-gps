@@ -7,16 +7,15 @@ import java.util.HashSet;
 
 public class Preferences {
 
-    private String TAG = "FPI";
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor prefEditor;
 
-    public double LATITUDE = 22.2855200;
-    public double LONGITUDE = 114.1576900;
-    public float BEARING = 0.0f;
-    public float SPEED = 0.0f;
-    public float ZOOM = 12.0f;
-    public boolean START = false;
+    public double LATITUDE = Constants.LATITUDE;
+    public double LONGITUDE = Constants.LONGITUDE;
+    public float BEARING = Constants.BEARING;
+    public float SPEED = Constants.SPEED;
+    public float ZOOM = Constants.ZOOM;
+    public boolean START = Constants.START;
     public HashSet<String> APPS = new HashSet<String>();
 
     public Preferences(Context context) {
@@ -48,6 +47,6 @@ public class Preferences {
         ZOOM = sharedPreferences.getFloat("zoom", ZOOM);
         START = sharedPreferences.getBoolean("start", START);
         APPS = (HashSet<String>) sharedPreferences.getStringSet("apps", APPS);
-        //Log.d(TAG, "SharedPreferences " + sharedPreferences.getAll().toString());
+        //Log.d(Constants.TAG, "SharedPreferences " + sharedPreferences.getAll().toString());
     }
 }

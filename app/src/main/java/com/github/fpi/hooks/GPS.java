@@ -15,7 +15,6 @@ import static de.robv.android.xposed.XposedHelpers.findClass;
 
 public class GPS implements IXposedHookLoadPackage {
 
-    private String TAG = "FPI";
     private XPreferences xPreferences = new XPreferences();
 
     @Override
@@ -32,7 +31,7 @@ public class GPS implements IXposedHookLoadPackage {
                 methodsToHook.add(method.toString());
             }
 
-            //Log.d(TAG, "Trying to hook " + loadPackageParam.packageName);
+            //Log.d(Constants.TAG, "Trying to hook " + loadPackageParam.packageName);
 
             XC_MethodHook methodHook = new XMethodHook();
 
@@ -42,14 +41,14 @@ public class GPS implements IXposedHookLoadPackage {
                     for (Method method : hookClass.getDeclaredMethods()) {
                         if (methodsToHook.contains(method.getName())) {
                             XposedBridge.hookMethod(method, methodHook);
-                            //Log.d(TAG, "Hooking method " + method.getName());
+                            //Log.d(Constants.TAG, "Hooking method " + method.getName());
                         }
                     }
                 } catch (ClassNotFoundError ex) {
-                    //Log.d(TAG, "Class " + clazz + " not found");
+                    //Log.d(Constants.TAG, "Class " + clazz + " not found");
                 }
             }
-            //Log.d(TAG, loadPackageParam.packageName + " successfully hooked");
+            //Log.d(Constants.TAG, loadPackageParam.packageName + " successfully hooked");
         }
     }
 
@@ -72,22 +71,22 @@ public class GPS implements IXposedHookLoadPackage {
                 switch (Methods.valueOf(param.method.getName())) {
                     case getLatitude:
                         param.setResult(xPreferences.LATITUDE);
-                        //Log.d(TAG, "getLatitude " + param.getResult());
+                        //Log.d(Constants.TAG, "getLatitude " + param.getResult());
                         break;
 
                     case getLongitude:
                         param.setResult(xPreferences.LONGITUDE);
-                        //Log.d(TAG, "getLongitude " + param.getResult());
+                        //Log.d(Constants.TAG, "getLongitude " + param.getResult());
                         break;
 
                     case getBearing:
                         param.setResult(xPreferences.BEARING);
-                        //Log.d(TAG, "getBearing " + param.getResult());
+                        //Log.d(Constants.TAG, "getBearing " + param.getResult());
                         break;
 
                     case getSpeed:
                         param.setResult(xPreferences.SPEED);
-                        //Log.d(TAG, "getSpeed " + param.getResult());
+                        //Log.d(Constants.TAG, "getSpeed " + param.getResult());
                         break;
                 }
             }

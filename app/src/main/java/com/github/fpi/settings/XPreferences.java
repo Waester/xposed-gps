@@ -8,14 +8,13 @@ import de.robv.android.xposed.XSharedPreferences;
 
 public class XPreferences {
 
-    private String TAG = "FPI";
     private XSharedPreferences xSharedPreferences;
 
-    public double LATITUDE = 22.2855200;
-    public double LONGITUDE = 114.1576900;
-    public float BEARING = 0.0f;
-    public float SPEED = 0.0f;
-    public boolean START = false;
+    public double LATITUDE = Constants.LATITUDE;
+    public double LONGITUDE = Constants.LONGITUDE;
+    public float BEARING = Constants.BEARING;
+    public float SPEED = Constants.SPEED;
+    public boolean START = Constants.START;
     public HashSet<String> APPS = new HashSet<String>();
 
     public XPreferences() {
@@ -31,6 +30,6 @@ public class XPreferences {
         SPEED = xSharedPreferences.getFloat("speed", SPEED);
         START = xSharedPreferences.getBoolean("start", START);
         APPS = (HashSet<String>) xSharedPreferences.getStringSet("apps", APPS);
-        //Log.d(TAG, "XSharedPreferences " + xSharedPreferences.getAll().toString());
+        //Log.d(Constants.TAG, "XSharedPreferences " + xSharedPreferences.getAll().toString());
     }
 }
